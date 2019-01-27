@@ -10,6 +10,7 @@ public class LambdaConstants {
 	public static final String FILE_PATH = "summary-analytics/final/";
 	
 	public static final String SUCCESS_MSG = "SUCCESSFUL";
+	public static final String FILE_NOT_FOUND = "FILE NOT FOUND";
 	
 	public static final String DATE_FORMAT = "YYYY-MM-DD";
 	

@@ -55,16 +55,7 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
 
 			convertCsvToJsonOutputStream(response);
 
-			UploadDocumentsRequest request = null;
-
-			request = new UploadDocumentsRequest();
-			request.setContentType(ContentType.Applicationjson);
-			request.setContentLength((long) outputStream.size());
-			request.setDocuments(new ByteArrayInputStream(outputStream.toByteArray()));
-
-			System.out.println(request.toString());
-
-			UploadDocumentsResult result = cloudSearchClient.uploadDocuments(request);
+			UploadDocumentsResult result = uploadDocumentToCloudSearch();
 
 			outputStream.reset();
 
@@ -76,7 +67,20 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
 
 			return LambdaConstants.SUCCESS_MSG;
 		}
-		return "FILE_NOT_FOUND";
+		return LambdaConstants.FILE_NOT_FOUND;
+	}
+	
+	private UploadDocumentsResult uploadDocumentToCloudSearch () {
+		UploadDocumentsRequest request = null;
+
+		request = new UploadDocumentsRequest();
+		request.setContentType(ContentType.Applicationjson);
+		request.setContentLength((long) outputStream.size());
+		request.setDocuments(new ByteArrayInputStream(outputStream.toByteArray()));
+
+		System.out.println(request.toString());
+
+		return cloudSearchClient.uploadDocuments(request);
 	}
 
 	private void convertCsvToJsonOutputStream(String csvString) {
