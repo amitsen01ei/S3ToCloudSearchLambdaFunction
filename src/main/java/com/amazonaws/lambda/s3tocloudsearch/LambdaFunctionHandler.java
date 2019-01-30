@@ -4,6 +4,8 @@ import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -147,7 +149,7 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
 		ResultSet output = new ResultSet();
 
 		output.setFields(
-				new Result(values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7]));
+				new Result(values[0], values[1], convertDateTime(values[2]), values[3], values[4], values[5], values[6], values[7]));
 		output.setType(LambdaConstants.CLOUDSEARCH_ADD);
 		output.setId(output.getFields().getBookId() + "-" + output.getFields().getAlgorithm());
 
@@ -155,7 +157,7 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
 	}
 
 	private String getFileAsStringFromS3() {
-		String filePath = s3Client.listObjects(LambdaConstants.BUCKET_NAME, LambdaConstants.FILE_PATH)
+		String filePath = s3Client.listObjects(LambdaConstants.BUCKET_NAME, LambdaConstants.FILE_PATH + getTodayString() + "/")
 				.getObjectSummaries().stream()
 				.filter(o -> o.getKey().contains(".csv"))
 				.map(S3ObjectSummary::getKey)
@@ -182,6 +184,16 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
 		deleteQuery.append("]");
 
 		return deleteQuery.toString();
+	}
+
+	private String convertDateTime (String dateTime) {
+		ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+		return DateTimeFormatter.ISO_INSTANT.format(zonedDateTime);
+	}
+
+	private String getTodayString () {
+		ZonedDateTime today = ZonedDateTime.now();
+		return DateTimeFormatter.ofPattern(LambdaConstants.DATE_FORMAT).format(today);
 	}
 
 	private void log(String text) {
