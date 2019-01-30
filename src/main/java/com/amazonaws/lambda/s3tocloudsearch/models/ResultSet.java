@@ -1,11 +1,11 @@
 package com.amazonaws.lambda.s3tocloudsearch.models;
 
-public class SummaryOutput {
-	
+public class ResultSet {
+
 	private String type;
 	private String id;
-	private Summary fields;
-	
+	private Result fields;
+
 	public String getType() {
 		return type;
 	}
@@ -18,10 +18,10 @@ public class SummaryOutput {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public Summary getFields() {
+	public Result getFields() {
 		return fields;
 	}
-	public void setFields(Summary fields) {
+	public void setFields(Result fields) {
 		this.fields = fields;
 	}
 }
