@@ -1,4 +1,4 @@
-package com.amazonaws.lambda.s3tocloudsearch.models;
+package com.liquid.recommendation.book.s3tocloudsearch.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
