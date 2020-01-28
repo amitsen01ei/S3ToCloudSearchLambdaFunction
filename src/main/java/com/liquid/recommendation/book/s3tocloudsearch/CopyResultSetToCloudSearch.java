@@ -46,20 +46,20 @@ public class CopyResultSetToCloudSearch implements RequestHandler<Object, String
 
 	private AmazonCloudSearchDomain domainDocClient = AmazonCloudSearchDomainClientBuilder.standard()
 			.withCredentials(credentialProvider)
-			.withEndpointConfiguration(new EndpointConfiguration(Constants.CLOUDSEARCH_DOC_ENDPOINT, Constants.REGION))
+			.withEndpointConfiguration(new EndpointConfiguration(Constants.CLOUD_SEARCH_DOC_ENDPOINT, Constants.REGION))
 			.build();
 
 	private AmazonCloudSearchDomain domainSearchClient = AmazonCloudSearchDomainClientBuilder.standard()
 			.withCredentials(credentialProvider).withEndpointConfiguration(
-					new EndpointConfiguration(Constants.CLOUDSEARCH_SEARCH_ENDPOINT, Constants.REGION))
+					new EndpointConfiguration(Constants.CLOUD_SEARCH_SEARCH_ENDPOINT, Constants.REGION))
 			.build();
 
-	Pattern pattern = Pattern.compile(Constants.SEPARATOR);
+	private Pattern pattern = Pattern.compile(Constants.SEPARATOR);
 
-	ObjectMapper mapper = new ObjectMapper();
+	private ObjectMapper mapper = new ObjectMapper();
 
-	LambdaLogger logger = null;
-	ByteArrayOutputStream outputStream = null;
+	private LambdaLogger logger = null;
+	private ByteArrayOutputStream outputStream = null;
 
 	@Override
 	public String handleRequest(Object input, Context context) {
@@ -111,23 +111,20 @@ public class CopyResultSetToCloudSearch implements RequestHandler<Object, String
 	}
 
 	private UploadDocumentsResult uploadDocumentToCloudSearch() {
-		UploadDocumentsRequest request = null;
 
-		request = new UploadDocumentsRequest();
+		UploadDocumentsRequest request = new UploadDocumentsRequest();
 		request.setContentType(ContentType.Applicationjson);
 		request.setContentLength((long) outputStream.size());
 		request.setDocuments(new ByteArrayInputStream(outputStream.toByteArray()));
 
 		log(request.toString());
 
-		UploadDocumentsResult result = domainDocClient.uploadDocuments(request);
-
-		return result;
+		return domainDocClient.uploadDocuments(request);
 	}
 
 	private void convertCsvToJsonOutputStream(String csvString) {
 		outputStream = new ByteArrayOutputStream();
-		String lines[] = csvString.split(Constants.SPLIT_PATTERN);
+		String[] lines = csvString.split(Constants.SPLIT_PATTERN);
 
 		List<ResultSet> outputList = Stream.of(lines).skip(1).map(String::trim).filter(line -> !line.isEmpty())
 				.map(this::convertCsvRowToModel).collect(Collectors.toList());
@@ -148,7 +145,7 @@ public class CopyResultSetToCloudSearch implements RequestHandler<Object, String
 
 		output.setFields(new Result(values[0], values[1], convertDateTime(values[2]), values[3], values[4], values[5],
 				values[6], values[7]));
-		output.setType(Constants.CLOUDSEARCH_ADD);
+		output.setType(Constants.CLOUD_SEARCH_ADD);
 		output.setId(output.getFields().getBookId() + "-" + output.getFields().getAlgorithm());
 
 		return output;
@@ -166,20 +163,18 @@ public class CopyResultSetToCloudSearch implements RequestHandler<Object, String
 			return null;
 		}
 
-		String response = s3Client.getObjectAsString(Constants.BUCKET_NAME, filePath);
-
-		return response;
+		return s3Client.getObjectAsString(Constants.BUCKET_NAME, filePath);
 	}
 
 	private String createDeleteQueryItem(List<String> bookIds) {
 
 		StringBuilder deleteQuery = new StringBuilder();
-		deleteQuery.append("[").append("{").append("\"type\":").append(Constants.CLOUDSEARCH_DELETE).append(",")
+		deleteQuery.append("[").append("{").append("\"type\":").append(Constants.CLOUD_SEARCH_DELETE).append(",")
 				.append("\"id\":").append("\"").append(bookIds.get(0)).append("\"").append("}");
 		bookIds.remove(0);
 
 		for (String id : bookIds) {
-			deleteQuery.append(",").append("{").append("\"type\":").append(Constants.CLOUDSEARCH_DELETE).append(",")
+			deleteQuery.append(",").append("{").append("\"type\":").append(Constants.CLOUD_SEARCH_DELETE).append(",")
 					.append("\"id\":").append("\"").append(id).append("\"").append("}");
 		}
 		deleteQuery.append("]");
