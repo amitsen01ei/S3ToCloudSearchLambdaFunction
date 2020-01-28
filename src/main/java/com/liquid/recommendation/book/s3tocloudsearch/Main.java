@@ -24,6 +24,6 @@ public class Main {
 
 	private static String getTodayString () {
 		ZonedDateTime today = ZonedDateTime.now();
-		return DateTimeFormatter.ofPattern(DATE_FORMAT).format(today).toString();
+		return DateTimeFormatter.ofPattern(DATE_FORMAT).format(today);
 	}
 }
